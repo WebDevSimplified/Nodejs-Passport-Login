@@ -1,12 +1,11 @@
 {
-  "name": "Current-Project",
+  "name": "current-project",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "devStart": "nodemon server.js"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {

@@ -6,21 +6,20 @@ const express = require('express')
 const app = express()
 const bcrypt = require('bcrypt')
 const passport = require('passport')
-const session = require('express-session')
 const flash = require('express-flash')
+const session = require('express-session')
 const methodOverride = require('method-override')
 
 const initializePassport = require('./passport-config')
 initializePassport(
   passport,
-  id => {
-    return users.find(user => user.id === id)
-  },
-  email => {
-    return users.find(user => user.email === email)
-  }
+  email => users.find(user => user.email === email),
+  id => users.find(user => user.id === id)
 )
 
+const users = []
+
+app.set('view-engine', 'ejs')
 app.use(express.urlencoded({ extended: false }))
 app.use(flash())
 app.use(session({
@@ -30,13 +29,10 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
-app.set('view-engine', 'ejs')
 app.use(methodOverride('_method'))
 
-const users = []
-
 app.get('/', checkAuthenticated, (req, res) => {
-  res.render('index.ejs', { user: req.user })
+  res.render('index.ejs', { name: req.user.name })
 })
 
 app.get('/login', checkNotAuthenticated, (req, res) => {
@@ -64,27 +60,28 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
     })
     res.redirect('/login')
   } catch {
-    res.redirect('register')
+    res.redirect('/register')
   }
+})
+
+app.delete('/logout', (req, res) => {
+  req.logOut()
+  res.redirect('/login')
 })
 
 function checkAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next()
   }
-  res.redirect('/login');    
+
+  res.redirect('/login')
 }
 
 function checkNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    return res.redirect('/');    
+    return res.redirect('/')
   }
   next()
 }
-
-app.delete('/logout', (req, res) => {
-  req.logOut()
-  res.redirect('/login')
-})
 
 app.listen(3000)
